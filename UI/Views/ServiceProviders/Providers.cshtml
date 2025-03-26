@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Domain.Dtos.Output.ServiceProviderDto>
+@{
+    ViewData["Title"] = "Providers";
+}
+
+<h1>Providers</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Contact Details</th>
+        <th scope="col">Created At</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var service in Model)
+    {
+        <tr>
+            <td>@service.Name</td>
+            <td>@service.ContactDetails</td>
+            <td>@service.CreatedAt.Date</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<button onclick="window.location.assign('@(Url.Action("Create"))')"
+        class="btn btn-primary position-fixed bottom-2 end-2 pointer-event z-3">
+    Add
+</button>
+

@@ -1,0 +1,76 @@
+﻿@model Domain.Dtos.Input.ServiceProviderModelCreateInput
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create New</h1>
+
+<form id="myForm">
+    <div class="mb-3">
+        <label asp-for="@Model.Name" class="form-label"></label>
+        <input asp-for="@Model.Name" class="form-control" id="name" placeholder="add name">
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="@Model.ContactDetails" class="form-label"></label>
+        <input asp-for="@Model.ContactDetails" id="details" class="form-control" placeholder="add name">
+        <span asp-validation-for="ContactDetails" class="text-danger"></span>
+    </div>
+
+    <div class="m-3">
+        <button id="btn" type="submit" class="btn btn-primary mb-3">Confirm identity</button>
+        <div id="spinner" class="spinner-border d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script>
+        $(document).ready(function (){
+             $("#myForm").submit(function (e){
+                const btn = $("#btn")
+                const spinner = $("#spinner");
+                const name = $("#name").value;
+                const details = $("#details").value;
+
+                btn.addClass("d-none")
+                spinner.removeClass("d-none");
+                if ($("#myForm").valid()){
+                    e.preventDefault();
+                    $.ajax({
+                        url:' @Url.Action("Create")',
+                        type: "POST",
+                        data: JSON.stringify({
+                            "Name" : name,
+                            "ContactDetails" : details
+                        }),
+                        processData: false,
+                        contentType: false,
+                        success: function (res){
+                            if (res.success){
+                                window.location.assign('@Url.Action("Providers")');
+                            }
+                            btn.removeClass("d-none");
+                            spinner.addClass("d-none");
+                        },
+                        error: function (res){
+                            btn.removeClass("d-none");
+                            spinner.addClass("d-none");
+                        }
+                    })
+                }else{
+                     btn.removeClass("d-none");
+                     spinner.addClass("d-none");
+                }
+            });
+        })
+    
+    </script>
+}
