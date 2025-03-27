@@ -1,21 +1,33 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Domain.Abstractions;
 using Domain.Dtos.Input;
-using Microsoft.AspNetCore.Mvc;
-using Domain.Helpers;
 using Domain.Dtos.Output;
+using Domain.Helpers;
+using Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using UI.Models;
 
 namespace UI.Controllers
 {
-    public class ProductsController(IProductRepository _repository, INotyfService _notyf) : Controller
+    public class ProductsController(IProductRepository _repository, IServiceProviderRepository providerRepository, INotyfService _notyf) : Controller
     {
         // GET: ProductsController
         public async Task<ActionResult> Products()
         {
             var products = await _repository.GetProducts(new());
-            if (!products.IsFailed) return View(products.Value);
-            _notyf.Error(products.GetErrorsMessage());
-            return View(Enumerable.Empty<ProductDto>());
+            if (products.IsFailed)
+            {
+                _notyf.Error(products.GetErrorsMessage());
+                return View(new AllProductsModelView([], []));
+            }
+            var providers = await providerRepository.GetServiceProviders();
+            if (providers.IsFailed)
+            {
+                _notyf.Error(providers.GetErrorsMessage());
+                return View(new AllProductsModelView([], []));
+            }
+            return View(new AllProductsModelView(products.Value, providers.Value));
         }
 
         // GET: ProductsController/Details/5
@@ -36,14 +48,19 @@ namespace UI.Controllers
         }
 
         // GET: ProductsController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            return View(new ProductModelCreateInput());
+            var providers = await providerRepository.GetServiceProviders();
+            if (providers.IsFailed)
+            {
+                _notyf.Error(providers.GetErrorsMessage());
+                return View(new CreateProductViewModel(new(), Enumerable.Empty<ServiceProviderDto>()));
+            }
+            return View(new CreateProductViewModel(new ProductModelCreateInput(), providers.Value));
         }
 
         // POST: ProductsController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(ProductModelCreateInput model)
         {
             try

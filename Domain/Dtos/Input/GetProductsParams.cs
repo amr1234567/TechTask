@@ -7,4 +7,7 @@ public record GetProductsParams
     public DateTime? CreatedTo { get; set; }
     public double? MinPrice { get; set; }
     public double? MaxPrice { get; set; }
+
+    public bool IsAllParamsNull => ProviderId == null && CreatedFrom == null && CreatedTo == null && MinPrice == null && MaxPrice == null;
+    
 }

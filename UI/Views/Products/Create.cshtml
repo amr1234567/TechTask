@@ -1,6 +1,114 @@
-﻿
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UI.Controllers.CreateProductViewModel
+
+
+<h1>Create New Product</h1>
+
+<form id="myForm">
+    <div class="mb-3">
+        <label asp-for="CreationModel.Name" class="form-label"></label>
+        <input asp-for="CreationModel.Name" class="form-control" id="name-input" placeholder="add name">
+        <span asp-validation-for="CreationModel.Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CreationModel.Price" class="form-label"></label>
+        <input asp-for="CreationModel.Price" type="number" min="0" id="price-input" class="form-control" placeholder="add price">
+        <span asp-validation-for="CreationModel.Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CreationModel.CreationDate" class="form-label"></label>
+        <input asp-for="CreationModel.CreationDate" type="date" id="create-date-input" class="form-control" placeholder="created at">
+        <span asp-validation-for="CreationModel.CreationDate" class="text-danger"></span>
+    </div>
+
+    <div id="provider-dropdown-container" class="mb-3">
+        <label class="form-label">Provider</label>
+
+        <div class="dropdown form-control">
+            <button id="dropdown-label" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Select Provider
+            </button>
+            <ul class="dropdown-menu">
+                @foreach (var provider in Model.Providers)
+                {
+                    <li data-value="@provider.Id"><a class="dropdown-item" onclick="changeLabelName('@provider.Name', '@provider.Id')">@provider.Name</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="m-3">
+        <button id="btn" type="submit" class="btn btn-primary mb-3">Create</button>
+        <div id="spinner" class="spinner-border d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        let providerIdSelected = "";
+        function changeLabelName(label, id) {
+            const labelHtml = $("#dropdown-label");
+            labelHtml.html(label);
+            providerIdSelected = id;
+        }
+        
+        $(document).ready(function (){
+            const form = $("#myForm");
+             form.submit(function (e){
+                 e.preventDefault();
+                const providerDropDownContainer = $("#provider-dropdown-container");
+                if (!providerIdSelected){
+                    providerDropDownContainer.append(`<div id="err-message-provider-id" class="text-danger">Provider is required</div>`);
+                    return;
+                } else {
+                    providerDropDownContainer.find("#err-message-provider-id").remove();
+                }
+                const btn = $("#btn")
+                const spinner = $("#spinner");
+                
+                const name = $("#name-input").val();
+                const price = $("#price-input").val();
+                const creationDate = $("#create-date-input").val();
+
+                btn.addClass("d-none")
+                spinner.removeClass("d-none");
+                if (form.valid() && providerIdSelected){
+                    $.ajax({
+                        url:'@Url.Action("Create")',
+                        type: "POST",
+                        data: {
+                                name,
+                                price,
+                                serviceProviderId : providerIdSelected,
+                                creationDate : creationDate
+                            },
+                        success: function (res) {
+                            if (res.success){
+                                window.location.assign('@Url.Action("Products")');
+                            }
+                            btn.removeClass("d-none");
+                            spinner.addClass("d-none");
+                        },
+                        error: function (res){
+                            btn.removeClass("d-none");
+                            spinner.addClass("d-none");
+                        }
+                    })
+                } else {
+                    btn.removeClass("d-none");
+                    spinner.addClass("d-none");
+                }
+            });
+        })
+    
+    
+    </script>
 }

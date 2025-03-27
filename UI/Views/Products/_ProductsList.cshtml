@@ -1,4 +1,24 @@
-﻿
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Domain.Dtos.Output.ProductDto>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Provider Name</th>
+        <th scope="col">Price</th>
+        <th scope="col">Created At</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var service in Model)
+    {
+        <tr>
+            <td>@service.Name</td>
+            <td>@service.ProviderName</td>
+            <td>@service.Price</td>
+            <td>@service.CreatedAt.ToShortDateString()</td>
+        </tr>
+    }
+    </tbody>
+</table>

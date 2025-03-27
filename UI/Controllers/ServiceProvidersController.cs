@@ -36,7 +36,6 @@ namespace UI.Controllers
 
         // POST: ServiceProvidersController1/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(ServiceProviderModelCreateInput model)
         {
             try

@@ -20,14 +20,14 @@
         <tr>
             <td>@service.Name</td>
             <td>@service.ContactDetails</td>
-            <td>@service.CreatedAt.Date</td>
+            <td>@service.CreatedAt.ToShortDateString()</td>
         </tr>
     }
     </tbody>
 </table>
 
 <button onclick="window.location.assign('@(Url.Action("Create"))')"
-        class="btn btn-primary position-fixed bottom-2 end-2 pointer-event z-3">
+        class="btn btn-primary mt-2">
     Add
 </button>
 

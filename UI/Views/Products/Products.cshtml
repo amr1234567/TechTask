@@ -1,6 +1,124 @@
-﻿
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model AllProductsModelView
+
+<h2>Products</h2>
+<header class="d-flex flex-wrap gap-4 align-items-center w-100 ">
+    <span>Filters</span>
+    <div class="me-2">
+        <label class="form-label">Provider</label>
+        <div class="form-control dropdown me-2">
+            <button id="dropdown-label" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Select Provider
+            </button>
+            <ul class="dropdown-menu">
+                <li data-value=""><a class="dropdown-item" onclick="changeLabelName('Select Provider', '')">None</a></li>
+                @foreach (var provider in Model.Providers)
+                {
+                    <li data-value="@provider.Id">
+                        <a class="dropdown-item" onclick="changeLabelName('@provider.Name', '@provider.Id')">
+                            @provider.Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div>
+        <label for="min-price-input" class="form-label">Min Price</label>
+        <input title="min price" class="form-control form-control-sm" id="min-price-input" type="number" onblur="detectPriceValue()" min="0" placeholder="Min Price">
+    </div>
+
+    <div class="me-2">
+        <label for="max-price-input" class="form-label">Max Price</label>
+        <input title="max price" class="form-control form-control-sm" id="max-price-input" type="number" min="0" onblur="detectPriceValue()" placeholder="Max Price">
+    </div>
+
+    <div>
+        <label for="date-from-input" class="form-label">Date From</label>
+        <input title="date from" class="form-control form-control-sm" id="date-from-input" type="date" placeholder="Date From" onchange="detectDateValue()">
+    </div>
+
+    <div class="me-2">
+        <label for="date-to-input" class="form-label">Date To</label>
+        <input title="date to" class="form-control form-control-sm" id="date-to-input" type="date" placeholder="Date To" onchange="detectDateValue()">
+    </div>
+
+    <button id="search-btn" onclick="searchForProducts()" type="button" class="btn btn-secondary">Search</button>
+    <div id="spinner" class="spinner-border d-none" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</header>
+
+
+<div id="products-container">
+    @await Html.PartialAsync("_ProductsList", Model.Products)
+</div>
+
+
+<button onclick="window.location.assign('@(Url.Action("Create"))')"
+        class="btn btn-primary mt-2">
+    Add
+</button>
+
+@section Scripts
+{
+    <script>
+        let providerIdSelected = "";
+        function changeLabelName(label, id) {
+            const labelHtml = $("#dropdown-label");
+            labelHtml.html(label);
+            providerIdSelected = id;
+        }
+
+        function detectPriceValue(){
+            const minValueInput = $("#min-price-input");
+            const maxValueInput = $("#max-price-input");
+            if (minValueInput.val() > maxValueInput.val())
+                maxValueInput.val(minValueInput.val());
+        }
+        
+        function detectDateValue(){
+            const minDateInput = $("#date-from-input");
+            const maxDateInput = $("#date-to-input");
+            const minDate = new Date(minDateInput.val());
+            const maxDate = new Date(maxDateInput.val());
+            if (minDate > maxDate) {
+                maxDateInput.val(minDateInput.val());
+            }
+        }
+        
+        function searchForProducts(){
+            const minPriceValue = $("#min-price-input").val();
+            const maxPriceValue = $("#max-price-input").val();
+            const minDateValue = $("#date-from-input").val();
+            const maxDateValue = $("#date-to-input").val();
+            
+            const productContainer = $("#products-container")
+            const searchBtn = $("#search-btn");
+            const spinner = $("#spinner");
+            spinner.removeClass("d-none");
+            searchBtn.addClass("d-none");
+            
+            $.ajax({
+                url:'@Url.Action("FilterProducts")',
+                type: "POST",
+                data: {
+                    providerId : providerIdSelected,
+                    createdFrom : minDateValue,
+                    createdTo : maxDateValue,
+                    minPrice : minPriceValue,
+                    maxPrice : maxPriceValue
+                },
+                success: function (res) {
+                    searchBtn.removeClass("d-none");
+                    spinner.addClass("d-none");
+                    productContainer.html(res);
+                },
+                error: function (res){
+                    searchBtn.removeClass("d-none");
+                    spinner.addClass("d-none");
+                }
+            })
+
+        }
+    </script>
 }

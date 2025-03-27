@@ -28,7 +28,7 @@ public class ProductRepository(ServiceProviderContext context) : IProductReposit
 
     public async Task<Result<ProductDto>> GetProductById(string id)
     {
-        var product = await context.Products.Where(p => p.Id == id).Select(p => new ProductDto().MapFrom(p)).FirstOrDefaultAsync();
+        var product = await context.Products.Where(p => p.Id == id).Include(p => p.ServiceProvider).Select(p => new ProductDto().MapFrom(p)).FirstOrDefaultAsync();
         if(product == null)
             return EntityNotFoundError.Exists<Product>(id);
         return product;
@@ -37,11 +37,12 @@ public class ProductRepository(ServiceProviderContext context) : IProductReposit
     public async Task<Result<IEnumerable<ProductDto>>> GetProducts(GetProductsParams inputs)
     {
         return await context.Products
-            .Where(p => (string.IsNullOrEmpty(inputs.ProviderId) && p.ServiceProviderId == inputs.ProviderId) ||
-                (inputs.CreatedFrom.HasValue && p.CreatedAt >= inputs.CreatedFrom.Value) || 
-                (inputs.CreatedTo.HasValue && p.CreatedAt <= inputs.CreatedTo.Value) ||
-                (inputs.MaxPrice.HasValue && p.Price <= inputs.MaxPrice.Value) ||
-                (inputs.MinPrice.HasValue && p.Price >= inputs.MinPrice.Value))
+            .Where(p =>(string.IsNullOrEmpty(inputs.ProviderId) || p.ServiceProviderId == inputs.ProviderId) &&
+                (!inputs.CreatedFrom.HasValue || p.CreatedAt >= inputs.CreatedFrom.Value) && 
+                (!inputs.CreatedTo.HasValue || p.CreatedAt <= inputs.CreatedTo.Value) &&
+                (!inputs.MaxPrice.HasValue || p.Price <= inputs.MaxPrice.Value) &&
+                (!inputs.MinPrice.HasValue || p.Price >= inputs.MinPrice.Value))
+            .Include(p => p.ServiceProvider)
             .Select(p => new ProductDto().MapFrom(p)).ToListAsync();
     }
 

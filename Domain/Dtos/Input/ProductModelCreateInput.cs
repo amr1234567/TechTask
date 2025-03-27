@@ -11,8 +11,12 @@ public record ProductModelCreateInput : IInputModel<Product>
     public string Name { get; set; }
 
     [Required(ErrorMessage = "The price is required.")]
-    [Range(0, double.MaxValue, ErrorMessage = "The price must be a non-negative value.")]
+    [Range(10, double.MaxValue, ErrorMessage = "The price must be a more than 0.")]
     public double Price { get; set; }
+
+    [Required(ErrorMessage = "Creation Date is required")]
+    [DataType(DataType.DateTime)]
+    public DateTime CreationDate { set; get; } = DateTime.UtcNow;
 
     [Required(ErrorMessage = "The service provider ID is required.")]
     public string ServiceProviderId { get; set; }
@@ -21,7 +25,7 @@ public record ProductModelCreateInput : IInputModel<Product>
     {
         return new()
         {
-            CreatedAt = DateTime.Now,
+            CreatedAt = CreationDate,
             Name = Name,
             Price = Price,
             ServiceProviderId = ServiceProviderId,
